@@ -1089,9 +1089,12 @@ func (s *Server) stopNoDebugProcess() {
 }
 
 // TODO(polina): support "remote" mode
+// TODO(polina): document behavior for remaining modes
+// replay: skips program build and sets the Debugger.CoreFile property based on the launch properties (rr or core dump)
+// record: builds the program and additionally calls gdbserial.Record() to generate an rr trace
 func isValidLaunchMode(launchMode interface{}) bool {
 	switch launchMode {
-	case "exec", "debug", "test", "record", "replay", "coredump":
+	case "exec", "debug", "test", "record", "replay":
 		return true
 	}
 
