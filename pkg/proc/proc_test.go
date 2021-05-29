@@ -318,8 +318,8 @@ func TestBreakpoint(t *testing.T) {
 		assertNoError(err, t, "Registers")
 		pc := regs.PC()
 
-		if bp.TotalHitCount != 1 {
-			t.Fatalf("Breakpoint should be hit once, got %d\n", bp.TotalHitCount)
+		if bp.UserBreaklet().TotalHitCount != 1 {
+			t.Fatalf("Breakpoint should be hit once, got %d\n", bp.UserBreaklet().TotalHitCount)
 		}
 
 		if pc-1 != bp.Addr && pc != bp.Addr {
@@ -1430,18 +1430,18 @@ func TestBreakpointCounts(t *testing.T) {
 			}
 		}
 
-		t.Logf("TotalHitCount: %d", bp.TotalHitCount)
-		if bp.TotalHitCount != 200 {
-			t.Fatalf("Wrong TotalHitCount for the breakpoint (%d)", bp.TotalHitCount)
+		t.Logf("TotalHitCount: %d", bp.UserBreaklet().TotalHitCount)
+		if bp.UserBreaklet().TotalHitCount != 200 {
+			t.Fatalf("Wrong TotalHitCount for the breakpoint (%d)", bp.UserBreaklet().TotalHitCount)
 		}
 
-		if len(bp.HitCount) != 2 {
-			t.Fatalf("Wrong number of goroutines for breakpoint (%d)", len(bp.HitCount))
+		if len(bp.UserBreaklet().HitCount) != 2 {
+			t.Fatalf("Wrong number of goroutines for breakpoint (%d)", len(bp.UserBreaklet().HitCount))
 		}
 
-		for _, v := range bp.HitCount {
+		for _, v := range bp.UserBreaklet().HitCount {
 			if v != 100 {
-				t.Fatalf("Wrong HitCount for breakpoint (%v)", bp.HitCount)
+				t.Fatalf("Wrong HitCount for breakpoint (%v)", bp.UserBreaklet().HitCount)
 			}
 		}
 	})
@@ -1497,23 +1497,23 @@ func TestBreakpointCountsWithDetection(t *testing.T) {
 				total += m[i] + 1
 			}
 
-			if uint64(total) != bp.TotalHitCount {
-				t.Fatalf("Mismatched total count %d %d\n", total, bp.TotalHitCount)
+			if uint64(total) != bp.UserBreaklet().TotalHitCount {
+				t.Fatalf("Mismatched total count %d %d\n", total, bp.UserBreaklet().TotalHitCount)
 			}
 		}
 
-		t.Logf("TotalHitCount: %d", bp.TotalHitCount)
-		if bp.TotalHitCount != 200 {
-			t.Fatalf("Wrong TotalHitCount for the breakpoint (%d)", bp.TotalHitCount)
+		t.Logf("TotalHitCount: %d", bp.UserBreaklet().TotalHitCount)
+		if bp.UserBreaklet().TotalHitCount != 200 {
+			t.Fatalf("Wrong TotalHitCount for the breakpoint (%d)", bp.UserBreaklet().TotalHitCount)
 		}
 
-		if len(bp.HitCount) != 2 {
-			t.Fatalf("Wrong number of goroutines for breakpoint (%d)", len(bp.HitCount))
+		if len(bp.UserBreaklet().HitCount) != 2 {
+			t.Fatalf("Wrong number of goroutines for breakpoint (%d)", len(bp.UserBreaklet().HitCount))
 		}
 
-		for _, v := range bp.HitCount {
+		for _, v := range bp.UserBreaklet().HitCount {
 			if v != 100 {
-				t.Fatalf("Wrong HitCount for breakpoint (%v)", bp.HitCount)
+				t.Fatalf("Wrong HitCount for breakpoint (%v)", bp.UserBreaklet().HitCount)
 			}
 		}
 	})
@@ -1626,7 +1626,7 @@ func TestCondBreakpoint(t *testing.T) {
 	protest.AllowRecording(t)
 	withTestProcess("parallel_next", t, func(p *proc.Target, fixture protest.Fixture) {
 		bp := setFileBreakpoint(p, t, fixture.Source, 9)
-		bp.Cond = &ast.BinaryExpr{
+		bp.UserBreaklet().Cond = &ast.BinaryExpr{
 			Op: token.EQL,
 			X:  &ast.Ident{Name: "n"},
 			Y:  &ast.BasicLit{Kind: token.INT, Value: "7"},
@@ -1648,7 +1648,7 @@ func TestCondBreakpointError(t *testing.T) {
 	protest.AllowRecording(t)
 	withTestProcess("parallel_next", t, func(p *proc.Target, fixture protest.Fixture) {
 		bp := setFileBreakpoint(p, t, fixture.Source, 9)
-		bp.Cond = &ast.BinaryExpr{
+		bp.UserBreaklet().Cond = &ast.BinaryExpr{
 			Op: token.EQL,
 			X:  &ast.Ident{Name: "nonexistentvariable"},
 			Y:  &ast.BasicLit{Kind: token.INT, Value: "7"},
@@ -1663,7 +1663,7 @@ func TestCondBreakpointError(t *testing.T) {
 			t.Fatalf("Unexpected error on first Continue(): %v", err)
 		}
 
-		bp.Cond = &ast.BinaryExpr{
+		bp.UserBreaklet().Cond = &ast.BinaryExpr{
 			Op: token.EQL,
 			X:  &ast.Ident{Name: "n"},
 			Y:  &ast.BasicLit{Kind: token.INT, Value: "7"},
@@ -1688,7 +1688,7 @@ func TestCondBreakpointError(t *testing.T) {
 func TestHitCondBreakpointEQ(t *testing.T) {
 	withTestProcess("break", t, func(p *proc.Target, fixture protest.Fixture) {
 		bp := setFileBreakpoint(p, t, fixture.Source, 7)
-		bp.HitCond = &struct {
+		bp.UserBreaklet().HitCond = &struct {
 			Op  token.Token
 			Val int
 		}{token.EQL, 3}
@@ -1712,7 +1712,7 @@ func TestHitCondBreakpointGEQ(t *testing.T) {
 	protest.AllowRecording(t)
 	withTestProcess("break", t, func(p *proc.Target, fixture protest.Fixture) {
 		bp := setFileBreakpoint(p, t, fixture.Source, 7)
-		bp.HitCond = &struct {
+		bp.UserBreaklet().HitCond = &struct {
 			Op  token.Token
 			Val int
 		}{token.GEQ, 3}
@@ -1735,7 +1735,7 @@ func TestHitCondBreakpointREM(t *testing.T) {
 	protest.AllowRecording(t)
 	withTestProcess("break", t, func(p *proc.Target, fixture protest.Fixture) {
 		bp := setFileBreakpoint(p, t, fixture.Source, 7)
-		bp.HitCond = &struct {
+		bp.UserBreaklet().HitCond = &struct {
 			Op  token.Token
 			Val int
 		}{token.REM, 2}
@@ -2482,7 +2482,7 @@ func TestStepConcurrentPtr(t *testing.T) {
 			kvals[gid] = k
 
 			assertNoError(p.Step(), t, "Step()")
-			for p.Breakpoints().HasInternalBreakpoints() {
+			for p.Breakpoints().HasSteppingBreakpoints() {
 				if p.SelectedGoroutine().ID == gid {
 					t.Fatalf("step did not step into function call (but internal breakpoints still active?) (%d %d)", gid, p.SelectedGoroutine().ID)
 				}
@@ -3210,7 +3210,7 @@ func TestIssue844(t *testing.T) {
 	withTestProcess("nextcond", t, func(p *proc.Target, fixture protest.Fixture) {
 		setFileBreakpoint(p, t, fixture.Source, 9)
 		condbp := setFileBreakpoint(p, t, fixture.Source, 10)
-		condbp.Cond = &ast.BinaryExpr{
+		condbp.UserBreaklet().Cond = &ast.BinaryExpr{
 			Op: token.EQL,
 			X:  &ast.Ident{Name: "n"},
 			Y:  &ast.BasicLit{Kind: token.INT, Value: "11"},
@@ -3666,7 +3666,7 @@ func TestIssue1145(t *testing.T) {
 		}()
 
 		assertNoError(p.Next(), t, "Next()")
-		if p.Breakpoints().HasInternalBreakpoints() {
+		if p.Breakpoints().HasSteppingBreakpoints() {
 			t.Fatal("has internal breakpoints after manual stop request")
 		}
 	})
@@ -4103,7 +4103,7 @@ func TestIssue1264(t *testing.T) {
 	// of evaluating a single boolean variable.
 	withTestProcess("issue1264", t, func(p *proc.Target, fixture protest.Fixture) {
 		bp := setFileBreakpoint(p, t, fixture.Source, 8)
-		bp.Cond = &ast.Ident{Name: "equalsTwo"}
+		bp.UserBreaklet().Cond = &ast.Ident{Name: "equalsTwo"}
 		assertNoError(p.Continue(), t, "Continue()")
 		assertLineNumber(p, t, 8, "after continue")
 	})
@@ -4526,7 +4526,7 @@ func TestIssue1615(t *testing.T) {
 
 	withTestProcess("issue1615", t, func(p *proc.Target, fixture protest.Fixture) {
 		bp := setFileBreakpoint(p, t, fixture.Source, 19)
-		bp.Cond = &ast.BinaryExpr{
+		bp.UserBreaklet().Cond = &ast.BinaryExpr{
 			Op: token.EQL,
 			X:  &ast.Ident{Name: "s"},
 			Y:  &ast.BasicLit{Kind: token.STRING, Value: `"projects/my-gcp-project-id-string/locations/us-central1/queues/my-task-queue-name"`},
@@ -4679,7 +4679,7 @@ func BenchmarkConditionalBreakpoints(b *testing.B) {
 	b.N = 1
 	withTestProcess("issue1549", b, func(p *proc.Target, fixture protest.Fixture) {
 		bp := setFileBreakpoint(p, b, fixture.Source, 12)
-		bp.Cond = &ast.BinaryExpr{
+		bp.UserBreaklet().Cond = &ast.BinaryExpr{
 			Op: token.EQL,
 			X:  &ast.Ident{Name: "value"},
 			Y:  &ast.BasicLit{Kind: token.INT, Value: "-1"},
@@ -5363,18 +5363,18 @@ func TestWatchpointCounts(t *testing.T) {
 			}
 		}
 
-		t.Logf("TotalHitCount: %d", bp.TotalHitCount)
-		if bp.TotalHitCount != 200 {
-			t.Fatalf("Wrong TotalHitCount for the breakpoint (%d)", bp.TotalHitCount)
+		t.Logf("TotalHitCount: %d", bp.UserBreaklet().TotalHitCount)
+		if bp.UserBreaklet().TotalHitCount != 200 {
+			t.Fatalf("Wrong TotalHitCount for the breakpoint (%d)", bp.UserBreaklet().TotalHitCount)
 		}
 
-		if len(bp.HitCount) != 2 {
-			t.Fatalf("Wrong number of goroutines for breakpoint (%d)", len(bp.HitCount))
+		if len(bp.UserBreaklet().HitCount) != 2 {
+			t.Fatalf("Wrong number of goroutines for breakpoint (%d)", len(bp.UserBreaklet().HitCount))
 		}
 
-		for _, v := range bp.HitCount {
+		for _, v := range bp.UserBreaklet().HitCount {
 			if v != 100 {
-				t.Fatalf("Wrong HitCount for breakpoint (%v)", bp.HitCount)
+				t.Fatalf("Wrong HitCount for breakpoint (%v)", bp.UserBreaklet().HitCount)
 			}
 		}
 	})
