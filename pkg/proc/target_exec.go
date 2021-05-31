@@ -53,6 +53,7 @@ func (dbp *Target) Continue() error {
 		thread.Common().CallReturn = false
 		thread.Common().returnValues = nil
 	}
+	dbp.Breakpoints().WatchOutOfScope = nil
 	dbp.CheckAndClearManualStopRequest()
 	defer func() {
 		// Make sure we clear internal breakpoints if we simultaneously receive a
