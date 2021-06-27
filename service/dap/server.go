@@ -784,11 +784,9 @@ func (s *Server) onLaunchRequest(request *dap.LaunchRequest) {
 			return
 		}
 
-		s.config.Debugger.CoreFile = traceDirPath
-		s.config.Debugger.Backend = "rr"
-
 		// Assign the rr trace directory path to debugger configuration
 		s.config.Debugger.CoreFile = traceDirPath
+		s.config.Debugger.Backend = "rr"
 	}
 
 	if mode == "core" {
@@ -802,12 +800,10 @@ func (s *Server) onLaunchRequest(request *dap.LaunchRequest) {
 			return
 		}
 
-		s.config.Debugger.CoreFile = coreFilePath
-		s.config.Debugger.Backend = "core"
-
 		// Assign the non-empty core file path to debugger configuration. This will
 		// trigger a native core file replay instead of an rr trace replay
 		s.config.Debugger.CoreFile = coreFilePath
+		s.config.Debugger.Backend = "core"
 	}
 
 	// Prepare the debug executable filename, build flags and build it
@@ -996,11 +992,13 @@ func (s *Server) stopNoDebugProcess() {
 
 // TODO(polina): support "remote" mode
 // TODO(polina): document behavior for remaining modes
-// replay: skips program build and sets the Debugger.CoreFile property based on the launch properties (rr or core dump)
-// record: builds the program and additionally calls gdbserial.Record() to generate an rr trace
+/* - replay: skips program build and sets the Debugger.CoreFile property based on the
+		coreFilePath launch property, using the default debug backend
+   - core: skips program build and sets the Debugger.CoreFile property based on the
+		traceDirPath launch property, setting the debug backend to rr */
 func isValidLaunchMode(launchMode interface{}) bool {
 	switch launchMode {
-	case "exec", "debug", "test", "replay":
+	case "exec", "debug", "test", "replay", "core":
 		return true
 	}
 
@@ -2396,7 +2394,7 @@ func (s *Server) onRestartRequest(request *dap.RestartRequest) {
 	s.sendNotYetImplementedErrorResponse(request.Request)
 }
 
-// onStepBackRequest `handles 'stepBack' request.
+// onStepBackRequest handles 'stepBack' request.
 // This is an optional request enabled by capability ‘supportsStepBackRequest’.
 func (s *Server) onStepBackRequest(request *dap.StepBackRequest, asyncSetupDone chan struct{}) {
 	s.send(&dap.StepBackResponse{Response: *newResponse(request.Request)})
@@ -2405,6 +2403,7 @@ func (s *Server) onStepBackRequest(request *dap.StepBackRequest, asyncSetupDone 
 
 // onReverseContinueRequest performs a rewind command call up to the previous
 // breakpoint or the start of the process
+// This is an optional request enabled by capability ‘supportsStepBackRequest’.
 func (s *Server) onReverseContinueRequest(request *dap.ReverseContinueRequest, asyncSetupDone chan struct{}) {
 	s.send(&dap.ReverseContinueResponse{
 		Response: *newResponse(request.Request),
