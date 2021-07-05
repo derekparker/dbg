@@ -4,7 +4,6 @@
 
 ### Synopsis
 
-
 [EXPERIMENTAL] Starts a TCP server communicating via Debug Adaptor Protocol (DAP).
 
 The server is headless and requires a DAP client like vscode to connect and request a binary
@@ -18,7 +17,13 @@ While --continue is not supported, stopOnEntry launch/attach attribute can be us
 execution is resumed at the start of the debug session.
 
 ```
-dlv dap
+dlv dap [flags]
+```
+
+### Options
+
+```
+  -h, --help   help for dap
 ```
 
 ### Options inherited from parent commands
@@ -43,5 +48,6 @@ dlv dap
 ```
 
 ### SEE ALSO
+
 * [dlv](dlv.md)	 - Delve is a debugger for the Go programming language.
 
