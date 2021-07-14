@@ -3,6 +3,47 @@
 All notable changes to this project will be documented in this file.
 This project adheres to Semantic Versioning.
 
+## [1.7.0] 2021-07-15
+
+### Added
+
+- Go 1.17 support (@aarzilli, @mknyszek)
+- Add new API and terminal command for setting watchpoints (@aarzilli)
+- Add filtering and grouping to goroutines command (@aarzilli)
+- Added support for hit count condition on breakpoints (@suzmue, @aarzilli)
+- DAP server: Handle SetVariable requests (@hyangah)
+- DAP server: Add clipboard support (@hyangah)
+
+### Fixed
+
+- DAP server: Send terminated event when disconnecting (@suzmue)
+- DAP server: Clean output executable name on Windows (@hyangah)
+- Fix runtimeTypeToDIE setup (necessary for Go 1.17) (@aarzilli)
+- Reenable CGO stacktrace test on arm64 (@derekparker)
+- Fix incorrect integer casts in freebsd C backend (@dwagin)
+- Ensure correct exit status reported on commands following process death (@derekparker)
+- Misc flakey test fixes / test refactoring (@polinasok)
+- Fix for frame parameter being ignored in ConvertEvalScope when no goroutine is found (@suzmue)
+- Ensure ContinueOnce returns StopExited if process exited, otherwise return StopUnknown (@polinasok)
+- Fix panic in RPC2.ListDynamicLibraries (@derekparker)
+- Fix typo in flag passed to check if debugserver supports unmask_signals (@staugust)
+
+### Changed
+
+- DAP server: Add sameuser security check (@hyangah)
+- DAP server: Increase default load limits for string type (@hyangah)
+- DAP server: Add paging for arrays, slices and maps (@suzmue)
+- DAP server: Deemphasize internal runtime stack frames (@suzmue)
+- DAP server: Add throw reason to exception information upon panic (@suzmue)
+- DAP server: Set breakpoint hit ID (@suzmue)
+- Documentation: Add viminspector to list of editor plugins (@aarzilli)
+- Support for ZMM registers in gdbserial backend (@aarzilli)
+- Remove support for stack barriers (@derekparker)
+- Improve support for DWARF5 (@derekparker)
+- Improve documentation (@derekparker, @aarzilli)
+- Print message and exit if Delve detects it is running under Rosetta on M1 macs (@aarzilli)
+- Drop official Go 1.14 support (@derekparker)
+
 ## [1.6.1] 2021-05-18
 
 ### Added
